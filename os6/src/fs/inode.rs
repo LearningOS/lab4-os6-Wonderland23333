@@ -4,7 +4,7 @@ use easy_fs::{
 };
 use crate::drivers::BLOCK_DEVICE;
 use crate::sync::UPSafeCell;
-use alloc::{sync::Arc, string::String};
+use alloc::{sync::Arc};
 use lazy_static::*;
 use bitflags::*;
 use alloc::vec::Vec;
