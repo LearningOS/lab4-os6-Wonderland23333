@@ -52,6 +52,60 @@ impl MemorySet {
     pub fn token(&self) -> usize {
         self.page_table.token()
     }
+    // check if virt addrs have overlaps
+    fn check_va_overlap(&self, start_va: VirtAddr, end_va: VirtAddr) -> bool {
+        for area in &self.areas {
+            let left: VirtAddr = area.vpn_range.get_start().into();
+            let right: VirtAddr = area.vpn_range.get_end().into();
+
+            if (left < end_va && start_va < left) || (right < end_va && start_va < right) {
+                return true;
+            }
+        }
+        false
+    }
+
+    // mmap
+    pub fn set_mmap(&mut self, start_va: VirtAddr, end_va: VirtAddr, permission: MapPermission) -> bool {
+        // check overlap
+        let has_overlap = self.check_va_overlap(start_va, end_va);
+        if has_overlap {
+            return false;
+        }
+
+        // 
+        self.insert_framed_area(start_va, end_va, permission);
+        true        
+    }
+
+    // munmap
+    pub fn set_munmap(&mut self, start_va: VirtAddr, end_va: VirtAddr) -> bool {
+
+        let len = self.areas.len();
+        let mut index= 0;
+        let mut find = false;
+
+        for i in 0..len {
+            let left: VirtAddr = self.areas[i].vpn_range.get_start().into();
+            let right: VirtAddr = self.areas[i].vpn_range.get_end().into();
+
+            if start_va == left && right == end_va {
+                index = i;
+                find = true;
+                break;
+            }
+        }
+
+        if find {
+            //  remove area
+            let mut  x = self.areas.remove(index);
+            x.unmap(&mut self.page_table);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /// Assume that no conflicts.
     pub fn insert_framed_area(
         &mut self,

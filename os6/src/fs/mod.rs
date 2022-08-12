@@ -9,17 +9,10 @@ pub trait File : Send + Sync {
     fn writable(&self) -> bool;
     fn read(&self, buf: UserBuffer) -> usize;
     fn write(&self, buf: UserBuffer) -> usize;
-    fn info(&self, _st: *mut Stat) {
-        unsafe {
-            *_st = Stat {
-                dev: 0,
-                ino: 0,
-                mode: StatMode::NULL,
-                nlink: 0,
-                pad: [0; 7],
-            }
-        }
-    }
+    // fn index_node_id(&self) -> usize;
+    // fn stat_mode(&self) -> StatMode;
+    // fn nlink(&self) -> u32; // 
+    fn fstat(&self) -> (usize, StatMode, u32);
 }
 
 /// The stat of a inode
@@ -51,7 +44,4 @@ bitflags! {
 }    
 
 pub use stdio::{Stdin, Stdout};
-pub use inode::{
-    OSInode, open_file, OpenFlags, list_apps, 
-    linkat, unlinkat
-};
+pub use inode::{OSInode, open_file, OpenFlags, list_apps, linkat, unlinkat};

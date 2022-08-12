@@ -4,11 +4,11 @@ use easy_fs::{
 };
 use crate::drivers::BLOCK_DEVICE;
 use crate::sync::UPSafeCell;
-use alloc::sync::Arc;
+use alloc::{sync::Arc, string::String};
 use lazy_static::*;
 use bitflags::*;
 use alloc::vec::Vec;
-use super::{File, Stat, StatMode};
+use super::{File, StatMode};
 use crate::mm::UserBuffer;
 
 /// A wrapper around a filesystem inode
@@ -64,6 +64,16 @@ lazy_static! {
         let efs = EasyFileSystem::open(BLOCK_DEVICE.clone());
         Arc::new(EasyFileSystem::root_inode(&efs))
     };
+}
+
+//  linkat
+pub fn linkat(old: &str, new: &str) {
+    ROOT_INODE.linkat(old, new);
+}
+
+// unlinkat
+pub fn unlinkat(name: &str) {
+    ROOT_INODE.unlinkat(name);
 }
 
 /// List all files in the filesystems
@@ -133,7 +143,7 @@ pub fn open_file(name: &str, flags: OpenFlags) -> Option<Arc<OSInode>> {
                 Arc::new(OSInode::new(
                     readable,
                     writable,
-                    inode
+                    inode,
                 ))
             })
     }
@@ -166,33 +176,16 @@ impl File for OSInode {
         }
         total_write_size
     }
-    fn info(&self, st: *mut Stat) {
+
+    fn fstat(&self) -> (usize, StatMode, u32) {
         let inner = self.inner.exclusive_access();
         let inode = &inner.inode;
-        //let (a, b) = inode.test();
-        //println!("a: {}, b: {}", a, b);
-        let (ino, mode, nlink) = inode.stat(&ROOT_INODE);
-        let mode = match mode {
+        let (ino, type_, nlink) = ROOT_INODE.fstat(inode);
+        let mode = match type_ {
             0 => StatMode::DIR,
             1 => StatMode::FILE,
             _ => StatMode::NULL,
         };
-        unsafe {
-            *st = Stat {
-                dev: 0,
-                ino: ino,
-                mode: mode,
-                nlink: nlink,
-                pad: [0; 7],
-            };
-        };
+        (ino, mode, nlink)
     }
-}
-
-pub fn linkat(old_name: &str, new_name: &str) {
-    ROOT_INODE.linkat(old_name, new_name);
-}
-
-pub fn unlinkat(name: &str) -> isize {
-    ROOT_INODE.unlinkat(name)
 }

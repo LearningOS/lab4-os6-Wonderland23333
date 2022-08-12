@@ -1,19 +1,11 @@
 //! Process management syscalls
 
-use crate::mm::{
-    translated_refmut, translated_str, 
-    MapPermission, VirtAddr, VPNRange, PageTable
-};
-use crate::task::{
-    add_task, current_task, current_user_token, exit_current_and_run_next,
-    suspend_current_and_run_next, TaskStatus,
-};
+use crate::mm::*;
+use crate::task::*;
 use crate::fs::{open_file, OpenFlags};
 use crate::timer::get_time_us;
 use alloc::sync::Arc;
-use alloc::vec::Vec;
 use crate::config::MAX_SYSCALL_NUM;
-use alloc::string::String;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -115,10 +107,18 @@ pub fn sys_waitpid(pid: isize, exit_code_ptr: *mut i32) -> isize {
 // YOUR JOB: 引入虚地址后重写 sys_get_time
 pub fn sys_get_time(_ts: *mut TimeVal, _tz: usize) -> isize {
     let _us = get_time_us();
-    let token = current_user_token();
-    let ts = translated_refmut(token, _ts);
+    // unsafe {
+    //     *ts = TimeVal {
+    //         sec: us / 1_000_000,
+    //         usec: us % 1_000_000,
+    //     };
+    // }
+    let va = VirtAddr::from(_ts as usize);
+    let pa = translated_va2pa(current_user_token(), va);
+
+    let ptr_ts = pa as *mut TimeVal;
     unsafe {
-        *ts = TimeVal {
+        *ptr_ts = TimeVal {
             sec: _us / 1_000_000,
             usec: _us % 1_000_000,
         };
@@ -128,113 +128,96 @@ pub fn sys_get_time(_ts: *mut TimeVal, _tz: usize) -> isize {
 
 // YOUR JOB: 引入虚地址后重写 sys_task_info
 pub fn sys_task_info(ti: *mut TaskInfo) -> isize {
-    -1
+    let va = VirtAddr::from(ti as usize);
+    let pa = translated_va2pa(current_user_token(), va);
+
+    let time = cal_time(get_time_us());
+
+    let ptr_ti = pa as *mut TaskInfo;
+    unsafe {
+        *ptr_ti = TaskInfo {
+            status: get_current_task_status(),
+            syscall_times: get_current_syscall_times(),
+            time,
+        };
+    }
+    0
+}
+
+pub fn cal_time(us: usize) -> usize {
+    let sec = us / 1_000_000;
+    let usec = us % 1_000_000;
+
+    ((sec & 0xffff) * 1000 + usec / 1000) as usize
 }
 
 // YOUR JOB: 实现sys_set_priority，为任务添加优先级
+// 合法返回proi, 否则返回-1
 pub fn sys_set_priority(_prio: isize) -> isize {
-    -1
+    // stride 调度要求进程优先级 >= 2
+    if _prio < 2 { 
+        return -1;
+    }
+    set_priority(_prio);
+    _prio
 }
 
 // YOUR JOB: 扩展内核以实现 sys_mmap 和 sys_munmap
 pub fn sys_mmap(_start: usize, _len: usize, _port: usize) -> isize {
-    let start_va = VirtAddr::from(_start);
-    let end_va = VirtAddr::from(_start+_len);
-    let task = current_task().unwrap();
-    let mut inner = task.inner_exclusive_access();
+    if _start % PAGE_SIZE != 0 { // 未对齐
+        return -1;
+    }
 
-    // check valid
-    if !start_va.aligned() {
-        println!("va aligned fail!");
+    if _port & !0x07 != 0 || _port & 0x07 == 0 || _len <= 0 {
         return -1;
     }
-    if (_port & !0x7 != 0) || (_port & 0x7 == 0) {
-        println!("port invalid");
+
+    let p = _port as u8;
+    let mut perm = MapPermission::from_bits(p << 1).unwrap();
+    perm |= MapPermission::U;
+
+    let start_va: VirtAddr = VirtAddr::from(_start).floor().into();
+    let end_va: VirtAddr = VirtAddr::from(_start + _len).ceil().into();
+
+    let ok = set_mmap(start_va, end_va, perm);
+    if !ok {
         return -1;
-    }
-    let vpn_range = VPNRange::new(start_va.floor(), end_va.ceil());
-    // check if mapped
-    for vpn in vpn_range {
-        match inner.memory_set.translate(vpn) {
-            Some(pte) => {
-                if pte.is_valid() {
-                    println!("already exist mapped page!");
-                    return -1;
-                }
-            },
-            None => (),
-        }
-    }
-    // map
-    let mut map_perm = MapPermission::U;
-    map_perm |= MapPermission::from_bits((_port as u8) << 1).unwrap();
-    inner.memory_set.insert_framed_area(
-        start_va,
-        end_va,
-        map_perm
-    );
-    // check if success
-    for vpn in vpn_range {
-        match inner.memory_set.translate(vpn) {
-            Some(pte) => (),
-            None => {
-                println!("sys_mmap fail!");
-                return -1;
-            },
-        }
     }
     0
 }
 
 pub fn sys_munmap(_start: usize, _len: usize) -> isize {
-    let start_va = VirtAddr::from(_start);
-    let end_va = VirtAddr::from(_start+_len);
-    let task = current_task().unwrap();
-    let mut inner = task.inner_exclusive_access();
-
-    // check valid
-    if !start_va.aligned() {
-        println!("va aligned fail!");
+    if _start % PAGE_SIZE != 0 { // 未对齐
         return -1;
     }
-    let vpn_range = VPNRange::new(start_va.floor(), end_va.ceil());
-    // check unmapped
-    for vpn in vpn_range {
-        match inner.memory_set.translate(vpn) {
-            Some(pte) => {
-                if !pte.is_valid() {
-                    println!("unmapped!");
-                    return -1;
-                }
-            },
-            None => {
-                println!("sys_mmap fail!");
-                return -1;
-            },
-        }
+
+    if _len <= 0 {
+        return -1;
     }
-    // unmap
-    for vpn in vpn_range {
-        inner.memory_set.remove_area_with_start_vpn(vpn);
+
+    let start_va: VirtAddr = VirtAddr::from(_start).floor().into();
+    let end_va: VirtAddr = VirtAddr::from(_start + _len).ceil().into();
+    
+    let ok = set_munmap(start_va, end_va);
+    if !ok {
+        return -1;
     }
     0
 }
 
-//
 // YOUR JOB: 实现 sys_spawn 系统调用
 // ALERT: 注意在实现 SPAWN 时不需要复制父进程地址空间，SPAWN != FORK + EXEC 
 pub fn sys_spawn(_path: *const u8) -> isize {
-    let token = current_user_token();
-    let path = translated_str(token, _path);
-    if let Some(app_inode) = open_file(path.as_str(), OpenFlags::RDONLY) {
-        let all_data = app_inode.read_all();
-        let current_task = current_task().unwrap();
+    let path = translated_str(current_user_token(), _path);
+    // assume the name is valid
+    let inode = open_file(path.as_str(), OpenFlags::RDONLY).unwrap();
+    let v = inode.read_all();
+    let current_task = current_task().unwrap();
+    let new_task = current_task.spawn(v.as_slice());
+    let new_pid = new_task.pid.0;
 
-        let new_task = current_task.spawn(all_data.as_slice());
-        let pid = new_task.pid.0;
-        add_task(new_task);
-        pid as isize
-    } else {
-        -1
-    }
+    //add new task to scheduler
+    add_task(new_task);
+    new_pid as isize
 }
+
