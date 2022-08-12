@@ -3,10 +3,8 @@
 
 Welcome to Open-Source OS Training Comp 2022（2022年开源操作系统训练营）.
 ## Scheduling
-- NOTICE current [**Stage1 SCHEDULING**](./scheduling.md) & [**Stage2 SCHEDULING**](./stage2-sched.md)（2022年开源操作系统训练营的第一/二阶段安排）!
+- NOTICE current [**SCHEDULING**](./scheduling.md)（2022年开源操作系统训练营的计划安排）!
 - [News](./news.md)（2022年开源操作系统训练营的新闻和纪要）
-- [QA](./QA.md)（常见问题解答）
-- [Online Ranking](https://learningos.github.io/classroom-grading/)（训练营在线排行榜）
 ## History
 - [open-source  os training comp 2021](https://github.com/rcore-os/rCore/wiki/os-tutorial-summer-of-code-2021)
 - [open-source  os training  comp 2020](https://github.com/rcore-os/rCore/wiki/os-tutorial-summer-of-code-2020)
@@ -15,11 +13,10 @@ Welcome to Open-Source OS Training Comp 2022（2022年开源操作系统训练�
 - [learning rust guide](https://course.rs/)（Rust语言圣经）
 - [Rust-lang Lab Test based on Rustlings](https://classroom.github.com/a/YTNg1dEH)（采用Github Classroom模式的Rustling小练习）
 ## Guide for OS
-- Guide deployed version can be found [here](https://learningos.github.io/rust-based-os-comp2022/)（精简OS实验指导，适合已经学过操作系统的过来人）
-- [rCore Tutorial v3 Guide](https://rcore-os.github.io/rCore-Tutorial-Book-v3/) (2022春季OS课程讲义，内容相对详细，适合没有学过操作系统的初学者)
+- Guide deployed version can be found [here](https://learningos.github.io/rust-based-os-comp2022/)（精简OS实验指导）
+- [rCore Tutorial v3 Guide](https://rcore-os.github.io/rCore-Tutorial-Book-v3/) (2022春季OS课程讲义)
 - [OS Course Slides in 2022 spring](https://learningos.github.io/os-lectures/)(2022春季OS课程Slides)
-- [训练营实验讲解videos](./relatedinfo.md#训练营rcore-tutorial和rustlings视频讲解)(训练营助教的实验详细讲解，适合参加本次训练营的学员)
-- [OS Course Videos in 2022 spring](./relatedinfo.md)(2022春季OS课程Videos，内容相对详细，适合没有学过操作系统的初学者)
+- [OS Course Videos in 2022 spring](./relatedinfo.md)(2022春季OS课程Videos)
 - [OS API Docs in 2022 spring](./relatedinfo.md)(2022春季OS课程实验中 ``cargo doc`` 生成的各章参考OS的API文档)
  
 First, you can read [Guide](https://learningos.github.io/rust-based-os-comp2022/) to:
@@ -47,7 +44,7 @@ According to the  [Guide](https://learningos.github.io/rust-based-os-comp2022/),
 - [lab4 in 'os6' DIR](https://classroom.github.com/a/94eMW8zi) ：[Important NOTICE](https://learningos.github.io/rust-based-os-comp2022/chapter6/0intro.html#id3)
 - [lab5 in 'os8' DIR](https://classroom.github.com/a/zqGJEPK-) ：[Important NOTICE](https://learningos.github.io/rust-based-os-comp2022/chapter8/0intro.html#id5)
 
-注：lab0-0\lab0-1用于搭建线上或本地实验环境，以及熟悉"提交/CI等"的操作过程，基本上不需要编程。lab1~lab5是实际的OS实验内容，需要编程。
+
 ## Check your results
 - lab1: `make test3` for lab1
 - lab2: `make test4`  for lab2 

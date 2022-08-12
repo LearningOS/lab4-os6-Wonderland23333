@@ -1,13 +1,7 @@
 
 
-## 2022春季OS课资源
-### 课程Slides
-- [2022春季课程Slides](https://learningos.github.io/os-lectures/)
+## 2022春季OS课课程视频
 
-### 课程参考书
-- [Operating Systems: Three Easy Pieces](https://pages.cs.wisc.edu/~remzi/OSTEP/)
-- [rCore Tutorial Book v3](https://rcore-os.github.io/rCore-Tutorial-Book-v3/)
-### 课程视频
 - [20220221第一次课视频](https://meeting.tencent.com/v2/cloud-record/share?id=5fcc9ef3-cb43-48f6-9d33-f75f640e8c38&from=3)
 - [20220228第二次课视频](https://meeting.tencent.com/v2/cloud-record/share?id=0c2a73ec-238a-453b-8f0f-aaadaeb55eca&from=3)
 - [20220307第三次课视频](https://meeting.tencent.com/v2/cloud-record/share?id=c21406cf-96f9-4df6-8cab-af4dbd798769&from=3)
@@ -22,12 +16,6 @@
 - [20220530第13次课视频](https://meeting.tencent.com/v2/cloud-record/share?id=34309e7e-3835-4d3f-a056-eceec5598f66&from=3)
 
 注：缺第七次课
-
-## 2022春季Advanced OS课相关资源
-- [2021 AOS课程视频/slides](https://www.xuetangx.com/course/thu080917777/3234209)
-- [论文阅读列表](https://github.com/chyyuu/aos_course_info/blob/master/readinglist.md)
-- [OS比赛相关的一些硬件/OS实例/教程](https://github.com/oscomp/os-competition-info/blob/main/ref-info.md)
-- [Rust based OS/Hypervisor/VMM/Firmwire](https://github.com/chyyuu/aos_course_info/blob/master/oslist.md)
 
 ## 2022春季OS课实验框架讲解
 
@@ -55,12 +43,7 @@
 - [rustlings & OS lab0-0 搭建环境和初始开发过程](https://www.bilibili.com/video/BV1fY4y1n7up?share_source=copy_web)
 - [rustlings:rust所有权和借用相关](https://www.bilibili.com/video/BV1ze4y1R7C9?share_source=copy_web)
 - [chapter1&chapter2实践的框架和代码分析讲解](https://cloud.tsinghua.edu.cn/f/254e6cc6921849e29e8c/)
-- [chapter3(lab1)实践的框架和代码分析讲解](https://cloud.tsinghua.edu.cn/f/17a7c9d9b57f4838ae5f/)
-- [chapter4(lab2)的代码分析和编程练习讲解](https://cloud.tsinghua.edu.cn/f/d44189eff077452e99a5/)
-- [chapter5(lab3)进程管理的代码解析和编程练习讲解](https://cloud.tsinghua.edu.cn/f/e2a8b8b54037484fac73/)
-- [chapter6(lab4)文件系统的代码解析和练习讲解视频](https://cloud.tsinghua.edu.cn/f/a5d5ece6e5b849a3ae8a/)
-- [chapter8(lab5)同步互斥的代码解析和练习讲解视频](https://cloud.tsinghua.edu.cn/f/b6b94ccebe084b31aa6b/)
-- [chapter9（第二阶段训练）内核中断/外设管理的代码解析讲解视频](https://cloud.tsinghua.edu.cn/f/1c9706422ad54cad997c/)
+
 ## 20220705"开源操作系统学习训练营开幕式" 相关slides
 
 - [2022年开源操作系统学习训练营安排：向勇](https://github.com/LearningOS/resrouce-on-rust-based-os-comp2022/blob/main/20220705-%E5%90%91%E5%8B%87-%E5%BC%80%E5%B9%95%E5%BC%8F%E4%B8%8A%E7%9A%84%E4%BB%8B%E7%BB%8D-v4.pdf)
